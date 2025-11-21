@@ -76,12 +76,16 @@ M.makeTitle = function()
 	replaceLine(strMakeTitle)
 end
 
-M.makeItem = function()
-	replaceLine(strMakeItem)
-end
-
 M.makeSubTitle = function()
 	replaceLine(strMakeSubTitle)
+end
+
+M.makeItem = function(mode)
+	if mode == "n" then
+		replaceLine(strMakeItem)
+	elseif mode == "v" then
+		updateMultipleLines(strMakeItem)
+	end
 end
 
 M.markItem = function(mode)
@@ -98,6 +102,10 @@ M.unmarkItem = function(mode)
 	elseif mode == "v" then
 		updateMultipleLines(strUnmarkItem)
 	end
+end
+
+M.setup = function(opts)
+	M.width = opts.width or 50
 end
 
 return M
