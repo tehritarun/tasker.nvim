@@ -1,5 +1,3 @@
-print("Tasker plugin loaded")
-
 M = {}
 
 M.width = 40
@@ -10,7 +8,6 @@ local replaceLine = function(f)
 	local win = vim.api.nvim_get_current_win()
 	local r, _ = unpack(vim.api.nvim_win_get_cursor(win))
 	local newLine = f(line)
-	print(vim.inspect(newLine))
 	vim.api.nvim_buf_set_lines(buf, r - 1, r, false, newLine)
 end
 
@@ -52,7 +49,16 @@ local strMakeItem = function(line)
 	}
 end
 
+local trim_spaces_and_hyphens = function(s)
+	-- Remove leading spaces and hyphens
+	s = s:gsub("^[%s%-]+", "")
+	-- Remove trailing spaces and hyphens
+	s = s:gsub("[%s%-]+$", "")
+	return s
+end
+
 local strMakeSubTitle = function(s)
+	s = trim_spaces_and_hyphens(s)
 	local spcCount = math.modf((M.width - #s) / 2)
 	local spc = string.rep("-", spcCount, "")
 	s = spc .. s:upper() .. spc
