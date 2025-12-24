@@ -15,7 +15,8 @@ The plugin can be configured with the `setup` function.
 
 ```lua
 require('tasker').setup({
-    width = 50 -- Width for titles and subtitles (default: 50)
+    width = 50, -- Width for titles and subtitles (default: 50)
+    target_file = "todo.md" -- Default file for Td command (default: "todo.md")
 })
 ```
 
@@ -25,9 +26,13 @@ The plugin exposes the following functions which can be mapped to keys:
 
 - `makeTitle`: Converts the current line into a centered title.
 - `makeSubTitle`: Converts the current line into a centered subtitle.
-- `makeItem(mode)`: Converts line(s) into task items. `mode` can be `'n'` (normal) or `'v'` (visual).
-- `markItem(mode)`: Marks task item(s) as done `[X]`.
-- `unmarkItem(mode)`: Unmarks task item(s) `[ ]`.
+- `makeItem`: Converts line(s) into task items. Works in both normal and visual mode.
+- `markItem`: Marks task item(s) as done `[X]`.
+- `unmarkItem`: Unmarks task item(s) `[ ]`.
+
+### Commands
+
+- `:Td`: Opens the configured `target_file` in a floating window.
 
 ## Installation
 
@@ -46,14 +51,9 @@ Install the plugin with your preferred package manager. Here is an example using
     vim.keymap.set('n', '<leader>ct', tasker.makeTitle, { desc = 'Make Title' })
     vim.keymap.set('n', '<leader>cs', tasker.makeSubTitle, { desc = 'Make Subtitle' })
 
-    vim.keymap.set('n', '<leader>cc', function() tasker.makeItem('n') end, { desc = 'Make item' })
-    vim.keymap.set('v', '<leader>cc', function() tasker.makeItem('v') end, { desc = 'Make item' })
-
-    vim.keymap.set('n', '<leader>cm', function() tasker.markItem('n') end, { desc = 'Mark item' })
-    vim.keymap.set('v', '<leader>cm', function() tasker.markItem('v') end, { desc = 'Mark item' })
-
-    vim.keymap.set('n', '<leader>cu', function() tasker.unmarkItem('n') end, { desc = 'Unmark item' })
-    vim.keymap.set('v', '<leader>cu', function() tasker.unmarkItem('v') end, { desc = 'Unmark item' })
+    vim.keymap.set({ 'n', 'v' }, '<leader>cc', tasker.makeItem, { desc = 'Make item' })
+    vim.keymap.set({ 'n', 'v' }, '<leader>cm', tasker.markItem, { desc = 'Mark item' })
+    vim.keymap.set({ 'n', 'v' }, '<leader>cu', tasker.unmarkItem, { desc = 'Unmark item' })
   end,
 }
 ```
