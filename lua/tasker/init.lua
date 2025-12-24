@@ -13,11 +13,22 @@ end
 
 local updateMultipleLines = function(f)
 	local buf = vim.api.nvim_get_current_buf()
-	local startRow, _ = unpack(vim.api.nvim_buf_get_mark(buf, "<"))
-	local endRow, _ = unpack(vim.api.nvim_buf_get_mark(buf, ">"))
+	local startRow = vim.fn.line("v")
+	local endRow = vim.fn.line(".")
+	-- print(startRow, endRow)
+	if startRow == 0 or endRow == 0 then
+		vim.notify("Tasker: No visual selection found. Please select lines in visual mode first.", vim.log.levels.WARN)
+		return
+	end
+
+	-- Ensure row range is valid (start <= end)
+	if startRow > endRow then
+		startRow, endRow = endRow, startRow
+	end
+
 	local lines = vim.api.nvim_buf_get_lines(buf, startRow - 1, endRow, false)
-	for i = 1, #lines, 1 do
-		lines[i] = f(lines[i])[1]
+	for i, line in ipairs(lines) do
+		lines[i] = f(line)[1]
 	end
 	vim.api.nvim_buf_set_lines(buf, startRow - 1, endRow, false, lines)
 end
@@ -40,7 +51,7 @@ end
 
 local strMakeItem = function(line)
 	local line_trim = line:gsub("^%s*(.-)", "%1")
-	if line_trim:sub(1, 1) == "[" or line_trim == "" then
+	if line_trim:sub(1, 1) == "-" or line_trim == "" then
 		return { line }
 	end
 	local spc = #line - #line_trim
@@ -86,7 +97,9 @@ M.makeSubTitle = function()
 	replaceLine(strMakeSubTitle)
 end
 
-M.makeItem = function(mode)
+M.makeItem = function()
+	local mode = vim.fn.mode()
+	-- print("mode", mode)
 	if mode == "n" then
 		replaceLine(strMakeItem)
 	elseif mode == "v" then
@@ -94,7 +107,8 @@ M.makeItem = function(mode)
 	end
 end
 
-M.markItem = function(mode)
+M.markItem = function()
+	local mode = vim.fn.mode()
 	if mode == "n" then
 		replaceLine(strMarkItem)
 	elseif mode == "v" then
@@ -102,7 +116,8 @@ M.markItem = function(mode)
 	end
 end
 
-M.unmarkItem = function(mode)
+M.unmarkItem = function()
+	local mode = vim.fn.mode()
 	if mode == "n" then
 		replaceLine(strUnmarkItem)
 	elseif mode == "v" then
@@ -173,6 +188,7 @@ local setup_user_commands = function(opts)
 end
 
 M.setup = function(opts)
+	opts = opts or {}
 	M.width = opts.width or 50
 	setup_user_commands(opts)
 end
