@@ -45,15 +45,15 @@ local strMakeItem = function(line)
 	end
 	local spc = #line - #line_trim
 	return {
-		line:sub(1, spc) .. "[ ] " .. string.upper(line:sub(spc + 1, spc + 1)) .. line:sub(spc + 2, spc + #line_trim),
+		line:sub(1, spc) .. "- [ ] " .. string.upper(line:sub(spc + 1, spc + 1)) .. line:sub(spc + 2, spc + #line_trim),
 	}
 end
 
 local trim_spaces_and_hyphens = function(s)
 	-- Remove leading spaces and hyphens
-	s = s:gsub("^[%s%-]+", "")
+	s = s:gsub("^- [%s%-]+", "")
 	-- Remove trailing spaces and hyphens
-	s = s:gsub("[%s%-]+$", "")
+	s = s:gsub("- [%s%-]+$", "")
 	return s
 end
 
@@ -131,7 +131,7 @@ local win_config = function()
 		height = height,
 		col = center_in(vim.o.columns, width),
 		row = center_in(vim.o.lines, height),
-		border = "single",
+		border = "rounded",
 	}
 end
 
@@ -157,7 +157,7 @@ local open_floating_file = function(target_file)
 		noremap = true,
 		callback = function()
 			if vim.api.nvim_get_option_value("modified", { buf = buf }) then
-				vim.notify("Saveyour changes please", vim.log.levels.WARN)
+				vim.notify("Save your changes please", vim.log.levels.WARN)
 			else
 				vim.api.nvim_win_close(0, true)
 			end
