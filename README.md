@@ -8,6 +8,7 @@ Neovim plugin for tasklist documents
 - **Task Management**: Quickly create task items with checkboxes `[ ]`.
 - **Progress Tracking**: Mark tasks as done `[X]` or unmark them.
 - **Visual Mode**: Apply changes to multiple lines at once in visual mode.
+- **Floating Terminal**: Persistent floating terminal for quick task execution.
 
 ## Configuration
 
@@ -33,6 +34,7 @@ The plugin exposes the following functions which can be mapped to keys:
 ### Commands
 
 - `:Td`: Opens the configured `target_file` in a floating window.
+- `:Tt`: Toggles a persistent floating terminal.
 
 ## Installation
 
@@ -45,15 +47,19 @@ Install the plugin with your preferred package manager. Here is an example using
     local tasker = require('tasker')
 
     -- Optional: Configure width
-    tasker.setup({ width = 60 })
+    tasker.setup { width = 60, target_file = '~/projects/tasker/todo.md' }
 
-    -- Keymaps
+    -- Keymaps for tasker
     vim.keymap.set('n', '<leader>ct', tasker.makeTitle, { desc = 'Make Title' })
     vim.keymap.set('n', '<leader>cs', tasker.makeSubTitle, { desc = 'Make Subtitle' })
 
     vim.keymap.set({ 'n', 'v' }, '<leader>cc', tasker.makeItem, { desc = 'Make item' })
     vim.keymap.set({ 'n', 'v' }, '<leader>cm', tasker.markItem, { desc = 'Mark item' })
     vim.keymap.set({ 'n', 'v' }, '<leader>cu', tasker.unmarkItem, { desc = 'Unmark item' })
+
+    -- keymaps for floating windows
+    vim.keymap.set('n', '<leader>td', '<cmd>Td<cr>', { desc = 'Open Todo' })
+    vim.keymap.set({ 'n', 'v' }, '<leader>tt', '<cmd>Tt<cr>', { desc = 'toggle terminal' })
   end,
 }
 ```
