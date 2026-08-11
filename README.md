@@ -5,8 +5,8 @@ Neovim plugin for tasklist documents
 ## Features
 
 - **Titles & Subtitles**: Easily create centered titles and subtitles with decorative borders.
-- **Task Management**: Quickly create task items with checkboxes `[ ]`.
-- **Progress Tracking**: Mark tasks as done `[X]` or unmark them.
+- **Task Management**: Quickly create task items with checkboxes `- [ ]`.
+- **Progress Tracking**: Mark tasks as done `- [X]` or unmark them.
 - **Visual Mode**: Apply changes to multiple lines at once in visual mode.
 - **Floating Terminal**: Persistent floating terminal for quick task execution.
 
@@ -28,8 +28,8 @@ The plugin exposes the following functions which can be mapped to keys:
 - `makeTitle`: Converts the current line into a centered title.
 - `makeSubTitle`: Converts the current line into a centered subtitle.
 - `makeItem`: Converts line(s) into task items. Works in both normal and visual mode.
-- `markItem`: Marks task item(s) as done `[X]`.
-- `unmarkItem`: Unmarks task item(s) `[ ]`.
+- `markItem`: Marks task item(s) as done `- [X]`.
+- `unmarkItem`: Unmarks task item(s) `- [ ]`.
 
 ### Commands
 
@@ -59,7 +59,7 @@ Install the plugin with your preferred package manager. Here is an example using
 
     -- keymaps for floating windows
     vim.keymap.set('n', '<leader>td', '<cmd>Td<cr>', { desc = 'Open Todo' })
-    vim.keymap.set({ 'n', 'v' }, '<leader>tt', '<cmd>Tt<cr>', { desc = 'toggle terminal' })
+    vim.keymap.set({ 'n', 't' }, '<leader>tt', '<cmd>Tt<cr>', { desc = 'toggle terminal' })
   end,
 }
 ```
