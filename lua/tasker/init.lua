@@ -1,142 +1,144 @@
-M = {}
+local M = {}
 
 M.width = 40
 
-local replaceLine = function(f)
+local function replace_line(transform_fn)
 	local buf = vim.api.nvim_get_current_buf()
 	local line = vim.api.nvim_get_current_line()
 	local win = vim.api.nvim_get_current_win()
-	local r, _ = unpack(vim.api.nvim_win_get_cursor(win))
-	local newLine = f(line)
-	vim.api.nvim_buf_set_lines(buf, r - 1, r, false, newLine)
+	local row = vim.api.nvim_win_get_cursor(win)[1]
+	local new_line = transform_fn(line)
+	vim.api.nvim_buf_set_lines(buf, row - 1, row, false, new_line)
 end
 
-local updateMultipleLines = function(f)
+local function update_multiple_lines(transform_fn)
 	local buf = vim.api.nvim_get_current_buf()
-	local startRow = vim.fn.line("v")
-	local endRow = vim.fn.line(".")
-	-- print(startRow, endRow)
-	if startRow == 0 or endRow == 0 then
+	local start_row = vim.fn.line("v")
+	local end_row = vim.fn.line(".")
+
+	if start_row == 0 or end_row == 0 then
 		vim.notify("Tasker: No visual selection found. Please select lines in visual mode first.", vim.log.levels.WARN)
 		return
 	end
 
 	-- Ensure row range is valid (start <= end)
-	if startRow > endRow then
-		startRow, endRow = endRow, startRow
+	if start_row > end_row then
+		start_row, end_row = end_row, start_row
 	end
 
-	local lines = vim.api.nvim_buf_get_lines(buf, startRow - 1, endRow, false)
+	local lines = vim.api.nvim_buf_get_lines(buf, start_row - 1, end_row, false)
 	for i, line in ipairs(lines) do
-		lines[i] = f(line)[1]
+		lines[i] = transform_fn(line)[1]
 	end
-	vim.api.nvim_buf_set_lines(buf, startRow - 1, endRow, false, lines)
+	vim.api.nvim_buf_set_lines(buf, start_row - 1, end_row, false, lines)
 end
 
-local strMakeTitle = function(line)
-	local strText = string.rep("-", M.width, "")
-	local spcCount = math.modf((M.width - 4 - string.len(line)) / 2)
-	local spc = string.rep(" ", spcCount, "")
-	line = spc .. line:upper() .. spc
-	if string.len(line) < M.width - 4 then
+local function str_make_title(line)
+	local border = string.rep("-", M.width)
+	local space_count = math.floor((M.width - 4 - #line) / 2)
+	local padding = string.rep(" ", space_count)
+
+	line = padding .. line:upper() .. padding
+	if #line < M.width - 4 then
 		line = line .. " "
 	end
+
 	line = "|-" .. line .. "-|"
-	if string.len(line) > M.width then
-		local diff = string.len(line) - M.width
-		strText = strText .. string.rep("-", diff, "")
+	if #line > M.width then
+		local diff = #line - M.width
+		border = border .. string.rep("-", diff)
 	end
-	return { strText, line, strText }
+
+	return { border, line, border }
 end
 
-local strMakeItem = function(line)
-	local line_trim = line:gsub("^%s*(.-)", "%1")
-	if line_trim:sub(1, 1) == "-" or line_trim == "" then
+local function str_make_item(line)
+	local trimmed = line:gsub("^%s*(.-)", "%1")
+	if trimmed:sub(1, 1) == "-" or trimmed == "" then
 		return { line }
 	end
-	local spc = #line - #line_trim
-	return {
-		line:sub(1, spc) .. "- [ ] " .. string.upper(line:sub(spc + 1, spc + 1)) .. line:sub(spc + 2, spc + #line_trim),
-	}
+
+	local indent = #line - #trimmed
+	local first_char = line:sub(indent + 1, indent + 1):upper()
+	local rest = line:sub(indent + 2, indent + #trimmed)
+
+	return { line:sub(1, indent) .. "- [ ] " .. first_char .. rest }
 end
 
-local trim_spaces_and_hyphens = function(s)
-	-- Remove leading spaces and hyphens
+local function trim_spaces_and_hyphens(s)
 	s = s:gsub("^- [%s%-]+", "")
-	-- Remove trailing spaces and hyphens
 	s = s:gsub("- [%s%-]+$", "")
 	return s
 end
 
-local strMakeSubTitle = function(s)
+local function str_make_subtitle(s)
 	s = trim_spaces_and_hyphens(s)
-	local spcCount = math.modf((M.width - #s) / 2)
-	local spc = string.rep("-", spcCount, "")
-	s = spc .. s:upper() .. spc
+	local space_count = math.floor((M.width - #s) / 2)
+	local padding = string.rep("-", space_count)
+
+	s = padding .. s:upper() .. padding
 	if #s ~= M.width then
 		s = s .. "-"
 	end
+
 	return { s }
 end
 
-local strMarkItem = function(s)
-	local output = s:gsub("%[.?%]", "[X]", 1)
-	return { output }
+local function str_mark_item(s)
+	return { s:gsub("%[.?%]", "[X]", 1) }
 end
 
-local strUnmarkItem = function(s)
-	local output = s:gsub("%[.?%]", "[ ]", 1)
-	return { output }
+local function str_unmark_item(s)
+	return { s:gsub("%[.?%]", "[ ]", 1) }
 end
 
 M.makeTitle = function()
-	replaceLine(strMakeTitle)
+	replace_line(str_make_title)
 end
 
 M.makeSubTitle = function()
-	replaceLine(strMakeSubTitle)
+	replace_line(str_make_subtitle)
 end
 
 M.makeItem = function()
 	local mode = vim.fn.mode()
-	-- print("mode", mode)
 	if mode == "n" then
-		replaceLine(strMakeItem)
+		replace_line(str_make_item)
 	elseif mode == "v" then
-		updateMultipleLines(strMakeItem)
+		update_multiple_lines(str_make_item)
 	end
 end
 
 M.markItem = function()
 	local mode = vim.fn.mode()
 	if mode == "n" then
-		replaceLine(strMarkItem)
+		replace_line(str_mark_item)
 	elseif mode == "v" then
-		updateMultipleLines(strMarkItem)
+		update_multiple_lines(str_mark_item)
 	end
 end
 
 M.unmarkItem = function()
 	local mode = vim.fn.mode()
 	if mode == "n" then
-		replaceLine(strUnmarkItem)
+		replace_line(str_unmark_item)
 	elseif mode == "v" then
-		updateMultipleLines(strUnmarkItem)
+		update_multiple_lines(str_unmark_item)
 	end
 end
 
-local expand_path = function(path)
+local function expand_path(path)
 	if path:sub(1, 1) == "~" then
 		return os.getenv("HOME") .. path:sub(2)
 	end
 	return path
 end
 
-local center_in = function(outer, inner)
+local function center_in(outer, inner)
 	return (outer - inner) / 2
 end
 
-local win_config = function()
+local function get_window_config()
 	local width = math.floor(vim.o.columns * 0.8)
 	local height = math.floor(vim.o.lines * 0.8)
 
@@ -150,10 +152,11 @@ local win_config = function()
 	}
 end
 
-local open_floating_file = function(target_file)
+local function open_floating_file(target_file)
 	local expanded_path = expand_path(target_file)
 	if vim.fn.filereadable(expanded_path) == 0 then
 		vim.notify("Todo file doesn't exist at directory: " .. expanded_path, vim.log.levels.ERROR)
+		return
 	end
 
 	local buf = vim.fn.bufnr(expanded_path, true)
@@ -165,7 +168,7 @@ local open_floating_file = function(target_file)
 
 	vim.bo[buf].swapfile = false
 
-	local win = vim.api.nvim_open_win(buf, true, win_config())
+	vim.api.nvim_open_win(buf, true, get_window_config())
 
 	vim.api.nvim_buf_set_keymap(buf, "n", "q", "", {
 		silent = true,
@@ -188,23 +191,14 @@ local state = {
 }
 
 local function create_floating_terminal(opts)
-	opts = opts or {}
-	local width = opts.width or math.floor(vim.o.columns * 0.8)
-	local height = opts.height or math.floor(vim.o.lines * 0.8)
-
-	-- calculate position to center of window
-	local col = math.floor((vim.o.columns - width) / 2)
-	local row = math.floor((vim.o.lines - height) / 2)
-
-	-- create buffer
-	local buf = nil
+	local buf
 	if vim.api.nvim_buf_is_valid(opts.buf) then
 		buf = opts.buf
 	else
 		buf = vim.api.nvim_create_buf(false, true)
 	end
 
-	local win = vim.api.nvim_open_win(buf, true, win_config())
+	local win = vim.api.nvim_open_win(buf, true, get_window_config())
 
 	return { buf = buf, win = win }
 end
@@ -221,8 +215,9 @@ local function toggle_terminal()
 	end
 end
 
-local setup_user_commands = function(opts)
+local function setup_user_commands(opts)
 	local target_file = opts.target_file or "todo.md"
+
 	vim.api.nvim_create_user_command("Td", function()
 		open_floating_file(target_file)
 	end, {})
