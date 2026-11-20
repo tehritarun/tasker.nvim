@@ -51,6 +51,7 @@ require('tasker').setup { width = 60, target_file = '~/projects/snippets/todo.md
 
 -- Keymaps
 vim.keymap.set('n', '<leader>td', '<cmd>Td<cr>', { desc = 'Open Todo' })
+vim.keymap.set({ 'n', 't' }, '<leader>tt', '<cmd>Tt<cr>', { desc = '[T]oggle [T]erminal' })
 
 vim.keymap.set('n', '<leader>ct', tasker.makeTitle, { desc = 'Make Title' })
 vim.keymap.set('n', '<leader>cs', tasker.makeSubTitle, { desc = 'Make Subtitle' })
@@ -58,6 +59,8 @@ vim.keymap.set('n', '<leader>cs', tasker.makeSubTitle, { desc = 'Make Subtitle' 
 vim.keymap.set({ 'n', 'v' }, '<leader>cc', tasker.makeItem, { desc = 'Make item' })
 vim.keymap.set({ 'n', 'v' }, '<leader>cm', tasker.markItem, { desc = 'Mark item' })
 vim.keymap.set({ 'n', 'v' }, '<leader>cu', tasker.unmarkItem, { desc = 'Unmark item' })
+-- Keymaps for markdown table
+vim.keymap.set('v', '<leader>mt', tasker.CreateMarkdownTable, { desc = 'Convert to markdown' })
 ```
 
 ### Using `lazy.nvim`
@@ -78,6 +81,8 @@ vim.keymap.set({ 'n', 'v' }, '<leader>cu', tasker.unmarkItem, { desc = 'Unmark i
     vim.keymap.set({ 'n', 'v' }, '<leader>cc', tasker.makeItem, { desc = 'Make item' })
     vim.keymap.set({ 'n', 'v' }, '<leader>cm', tasker.markItem, { desc = 'Mark item' })
     vim.keymap.set({ 'n', 'v' }, '<leader>cu', tasker.unmarkItem, { desc = 'Unmark item' })
+    -- Keymaps for markdown table
+    vim.keymap.set('v', '<leader>mt', tasker.CreateMarkdownTable, { desc = 'Convert to markdown' })
 
     -- keymaps for floating windows
     vim.keymap.set('n', '<leader>td', '<cmd>Td<cr>', { desc = 'Open Todo' })
