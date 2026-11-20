@@ -2,6 +2,39 @@ local M = {}
 
 M.width = 40
 
+local function make_md_table_row(line, separator)
+	local newline, count = string.gsub(line, separator, " | ")
+	newline = "| " .. newline .. " |"
+	return newline, count
+end
+
+local function markdown_table()
+	local buf = vim.api.nvim_get_current_buf()
+	local start_row = vim.fn.line("v")
+	local end_row = vim.fn.line(".")
+
+	if start_row == 0 or end_row == 0 then
+		vim.notify("Tasker: No visual selection found. Please select lines in visual mode first.", vim.log.levels.WARN)
+		return
+	end
+
+	-- Ensure row range is valid (start <= end)
+	if start_row > end_row then
+		start_row, end_row = end_row, start_row
+	end
+
+	local lines = vim.api.nvim_buf_get_lines(buf, start_row - 1, end_row, false)
+	local count = 0
+	for i, line in ipairs(lines) do
+		lines[i], count = make_md_table_row(line, ",")
+	end
+
+	local divider = string.rep("| --- ", count + 1) .. "|"
+	table.insert(lines, 2, divider)
+
+	vim.api.nvim_buf_set_lines(buf, start_row - 1, end_row, false, lines)
+end
+
 local function replace_line(transform_fn)
 	local buf = vim.api.nvim_get_current_buf()
 	local line = vim.api.nvim_get_current_line()
@@ -224,6 +257,10 @@ local function setup_user_commands(opts)
 
 	vim.api.nvim_create_user_command("Tt", function()
 		toggle_terminal()
+	end, {})
+
+	vim.api.nvim_create_user_command("CreateMarkdownTable", function()
+		markdown_table()
 	end, {})
 end
 
