@@ -134,7 +134,6 @@ local function make_md_table_row(line, separator)
 end
 
 M.CreateMarkdownTable = function()
-	print("md_table_called")
 	local buf = vim.api.nvim_get_current_buf()
 	local start_row = vim.fn.line("v")
 	local end_row = vim.fn.line(".")
@@ -148,8 +147,6 @@ M.CreateMarkdownTable = function()
 	if start_row > end_row then
 		start_row, end_row = end_row, start_row
 	end
-
-	print(start_row, end_row)
 
 	local lines = vim.api.nvim_buf_get_lines(buf, start_row - 1, end_row, false)
 	local count = 0
