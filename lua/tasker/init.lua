@@ -85,11 +85,11 @@ local function str_make_subtitle(s)
 end
 
 local function str_mark_item(s)
-	return { s:gsub("%[.?%]", "[X]", 1) }
+	return { (s:gsub("%[.?%]", "[X]", 1)) }
 end
 
 local function str_unmark_item(s)
-	return { s:gsub("%[.?%]", "[ ]", 1) }
+	return { (s:gsub("%[.?%]", "[ ]", 1)) }
 end
 
 M.makeTitle = function()
